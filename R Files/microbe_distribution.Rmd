@@ -1,0 +1,119 @@
+---
+title: "LANL"
+author: "Eric Tran"
+date: "1/16/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+library(ggplot2)
+library(ggpubr)
+library(tidyverse)
+library(coin)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+# Read in DBSCAN prophage data
+dbscan_soil <- read.delim("dbscan_soil_data.tsv", header = FALSE, sep = " ")
+dbscan_soil["Environment"] = "Soil"
+dbscan_soil["Software"] = "DBSCAN-SWA"
+colnames(dbscan_soil) <- c("bacterial_species", "Prophage_Count", "Environment", "Software")
+
+dbscan_marine <- read.delim("dbscan_marine_data.tsv", header = FALSE, sep = " ")
+dbscan_marine["Environment"] = "Marine"
+dbscan_marine["Software"] = "DBSCAN-SWA"
+colnames(dbscan_marine) <- c("bacterial_species", "Prophage_Count", "Environment", "Software")
+
+dbscan_human <- read.delim("dbscan_human_microbiome_data.tsv", header = FALSE, sep = " ")
+dbscan_human["Environment"] = "Human"
+colnames(dbscan_human) <- c("bacterial_species", "Prophage_Count", "Environment")
+```
+
+```{r pressure, echo=FALSE}
+hist(dbscan_soil$Prophage_Count)
+hist(dbscan_marine$Prophage_Count)
+```
+
+```{r pressure, echo=FALSE}
+# Create DBSCAN boxplots
+
+dbscan_soil_ggplot <- ggplot(dbscan_soil, aes(x=Environment, y=Prophage_Count)) + geom_boxplot(outlier.shape = NA) + scale_y_continuous(limits = c(0, 15))
+
+dbscan_marine_ggplot <- ggplot(dbscan_marine, aes(x=Environment, y=Prophage_Count)) + geom_boxplot(outlier.shape = NA) + scale_y_continuous(limits = c(0, 12))
+
+dbscan_soil_ggplot
+dbscan_marine_ggplot
+
+```
+
+```{r pressure, echo=FALSE}
+# Combined DBSCAN boxplots
+dbscan_data_combined <- rbind(dbscan_soil, dbscan_marine)
+dbscan_combined_ggplot <- ggplot(dbscan_data_combined, aes(x=Environment, y=Prophage_Count)) + geom_boxplot(outlier.shape = NA) + scale_y_continuous(limits = c(0, 15))
+dbscan_combined_ggplot
+```
+
+
+```{r pressure, echo=FALSE}
+# Phispy Stuff
+phispy_soil <- read.delim("soil_prophage_data.tsv", header = FALSE, sep = " ")
+phispy_soil["Environment"] = "Soil"
+colnames(phispy_soil) <- c("bacterial_species", "Prophage_Count", "Environment")
+
+phispy_marine <- read.delim("marine_prophage_data.tsv", header = FALSE, sep = " ")
+phispy_marine["Environment"] = "Marine"
+colnames(phispy_marine) <- c("bacterial_species", "Prophage_Count", "Environment")
+
+# Compile the counts into one column
+phispy_soil <- data.frame(table(phispy_soil$bacterial_species))
+phispy_soil["Type"] = "Soil"
+phispy_soil["Software"] = "PhiSpy"
+colnames(phispy_soil) <- c("bacterial_species", "Prophage_Count", "Environment", "Software")
+
+phispy_marine <- data.frame(table(phispy_marine$bacterial_species))
+phispy_marine["Type"] = "Marine"
+phispy_marine["Software"] = "PhiSpy"
+colnames(phispy_marine) <- c("bacterial_species", "Prophage_Count", "Environment", "Software")
+```
+
+```{r pressure, echo=FALSE}
+# Create overlapping boxplots for Phispy and DBSCAN data
+combined_df <- rbind(phispy_soil, phispy_marine, dbscan_marine, dbscan_soil)
+
+final_plot <- ggplot(combined_df, aes(x=Environment, y=Prophage_Count, fill=Software,)) + 
+  geom_boxplot(outlier.shape = NA) + labs(y="Prophage Count")+ scale_y_continuous(limits = c(0, 18)) + theme(legend.position = c(0.12, 0.8), axis.text.x = element_text(size = 15), axis.text.y = element_text(size = 15), axis.title.x = element_text(size = 15), axis.title.y = element_text(size = 15))
+
+#Add the p-value to the graph by conducting a wilcoxon test
+# final_plot + stat_compare_means(method = "wilcox.test")
+# Wilcoxon, p < 2.2e-16
+final_plot
+```
+
+```{r echo=FALSE}
+# PhiSpy Soil and Marine
+phispy_soil_counts <- as.vector(phispy_soil$Prophage_Count)
+phispy_marine_counts <- as.vector(phispy_marine$Prophage_Count)
+phispy_wilcox <- wilcox.test(phispy_soil_counts, phispy_marine_counts, exact = TRUE)
+phispy_wilcox
+
+dbscan_soil_counts <- as.vector(dbscan_soil$Prophage_Count)
+dbscan_marine_counts <- as.vector(dbscan_marine$Prophage_Count)
+dbscan_wilcox <- wilcox.test(dbscan_soil_counts, dbscan_marine_counts, exact = TRUE)
+dbscan_wilcox
+```
+
+
