@@ -15,4 +15,4 @@ FUTURE DIRECTIONS:
 
 2021 Genomics in Action Poster:
 
-![Image](/Users/trane/Desktop/LANL-Prophage-Project/GIA_Prophage_Poster.jpg)
+![Image](GIA_Prophage_Poster.jpg)
