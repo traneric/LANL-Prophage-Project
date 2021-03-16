@@ -12,6 +12,7 @@ FUTURE DIRECTIONS:
 - Optimize pipeline with a workflow management system
 - Phylogenetic analysis of bacterial genome assemblies
 - Statistical analyses of prophage distribution across taxonomic groups
+- Analyze human microbiome data
 
 2021 Genomics in Action Poster:
 
